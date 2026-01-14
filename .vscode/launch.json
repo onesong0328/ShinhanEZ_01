@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-ShinhanEZApplication<ShinhanEZ>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.shinhanez.ShinhanEZApplication",
+            "projectName": "ShinhanEZ",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}

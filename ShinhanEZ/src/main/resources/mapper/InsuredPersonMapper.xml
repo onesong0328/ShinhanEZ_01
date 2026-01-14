@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.shinhanez.mapper.InsuredPersonMapper">
+    
+    <!-- 전체 목록 (고객명 조인) -->
+    <select id="findAll" resultType="InsuredPerson">
+        SELECT i.insured_id, i.customer_id, c.name AS customer_name,
+               i.name, i.birth_date, i.gender, i.phone, i.relation, i.reg_date
+        FROM insured_person i
+        JOIN customer c ON i.customer_id = c.customer_id
+        ORDER BY i.reg_date DESC
+    </select>
+    
+    <!-- 상세 조회 -->
+    <select id="findById" parameterType="String" resultType="InsuredPerson">
+        SELECT i.insured_id, i.customer_id, c.name AS customer_name,
+               i.name, i.birth_date, i.gender, i.phone, i.relation, i.reg_date
+        FROM insured_person i
+        JOIN customer c ON i.customer_id = c.customer_id
+        WHERE i.insured_id = #{insuredId}
+    </select>
+    
+    <!-- 등록 -->
+    <insert id="insert" parameterType="InsuredPerson">
+        INSERT INTO insured_person (insured_id, customer_id, name, birth_date, gender, phone, relation)
+        VALUES (#{insuredId}, #{customerId}, #{name}, #{birthDate}, #{gender}, #{phone}, #{relation})
+    </insert>
+
+    <!-- 수정 -->
+    <update id="update" parameterType="InsuredPerson">
+        UPDATE insured_person SET
+            customer_id = #{customerId},
+            name = #{name},
+            birth_date = #{birthDate},
+            gender = #{gender},
+            phone = #{phone},
+            relation = #{relation}
+        WHERE insured_id = #{insuredId}
+    </update>
+    
+    <!-- 삭제 -->
+    <delete id="delete" parameterType="String">
+        DELETE FROM insured_person WHERE insured_id = #{insuredId}
+    </delete>
+    
+    <!-- 전체 수 -->
+    <select id="count" resultType="int">
+        SELECT COUNT(*) FROM insured_person
+    </select>
+    
+    <!-- 페이징 목록 조회 -->
+    <select id="findByPage" resultType="InsuredPerson">
+        SELECT * FROM (
+            SELECT ROWNUM AS rn, t.* FROM (
+                SELECT i.insured_id, i.customer_id, c.name AS customer_name,
+                       i.name, i.birth_date, i.gender, i.phone, i.relation, i.reg_date
+                FROM insured_person i
+                JOIN customer c ON i.customer_id = c.customer_id
+                <choose>
+                    <when test="sort == 'name'">ORDER BY i.name ASC</when>
+                    <when test="sort == 'oldest'">ORDER BY i.reg_date ASC</when>
+                    <otherwise>ORDER BY i.reg_date DESC</otherwise>
+                </choose>
+            ) t WHERE ROWNUM &lt;= #{offset} + #{size}
+        ) WHERE rn > #{offset}
+    </select>
+
+    <!-- 검색 + 페이징 -->
+    <select id="findBySearch" resultType="InsuredPerson">
+        SELECT * FROM (
+            SELECT ROWNUM AS rn, t.* FROM (
+                SELECT i.insured_id, i.customer_id, c.name AS customer_name,
+                       i.name, i.birth_date, i.gender, i.phone, i.relation, i.reg_date
+                FROM insured_person i
+                JOIN customer c ON i.customer_id = c.customer_id
+                WHERE i.name LIKE '%' || #{keyword} || '%'
+                   OR c.name LIKE '%' || #{keyword} || '%'
+                   OR i.phone LIKE '%' || #{keyword} || '%'
+                ORDER BY i.reg_date DESC
+            ) t WHERE ROWNUM &lt;= #{offset} + #{size}
+        ) WHERE rn > #{offset}
+    </select>
+    
+    <!-- 검색 결과 수 -->
+    <select id="countBySearch" parameterType="String" resultType="int">
+        SELECT COUNT(*) FROM insured_person i
+        JOIN customer c ON i.customer_id = c.customer_id
+        WHERE i.name LIKE '%' || #{keyword} || '%'
+           OR c.name LIKE '%' || #{keyword} || '%'
+           OR i.phone LIKE '%' || #{keyword} || '%'
+    </select>
+    
+    <!-- 새 ID 생성 -->
+    <select id="getNextId" resultType="String">
+        SELECT 'I' || LPAD(insured_seq.NEXTVAL, 3, '0') FROM DUAL
+    </select>
+    
+</mapper>
