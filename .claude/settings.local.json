@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "mcp__kapture__list_tabs",
-      "mcp__kapture__screenshot",
-      "mcp__kapture__click"
-    ]
-  }
-}
